@@ -146,6 +146,75 @@ def evalua_3con(s):
         print("ERROR, evaluación fuera de rango --> ", promedio)
     return promedio
 
+def evalua_bloqueos(s, jugador):
+    """
+    Evalúa el estado del tablero favoreciendo bloqueos al oponente y penalizando
+    configuraciones peligrosas del oponente.
+    
+    Parámetros:
+    -----------
+    s : tuple
+        Estado del tablero (6 filas x 7 columnas representadas como una tupla de 42 elementos).
+    jugador : int
+        Jugador actual (1 para jugador 1, -1 para jugador 2).
+    
+    Retorna:
+    --------
+    float
+        Valor heurístico del estado del tablero.
+    """
+    oponente = -jugador
+    bloqueos = 0
+    amenazas = 0
+
+    # Evaluar bloqueos y amenazas en líneas verticales
+    for i in range(7):  # Columnas
+        for j in range(3):  # Filas donde se puede formar una línea de 4
+            linea = [s[i + 7 * j], s[i + 7 * (j + 1)], s[i + 7 * (j + 2)], s[i + 7 * (j + 3)]]
+            if linea.count(oponente) == 3 and linea.count(0) == 1:
+                bloqueos += 1  # Bloqueo potencial
+            if linea.count(oponente) == 2 and linea.count(0) == 2:
+                amenazas += 1  # Amenaza potencial
+
+    # Evaluar bloqueos y amenazas en líneas horizontales
+    for i in range(6):  # Filas
+        for j in range(4):  # Columnas donde se puede formar una línea de 4
+            linea = [s[7 * i + j], s[7 * i + j + 1], s[7 * i + j + 2], s[7 * i + j + 3]]
+            if linea.count(oponente) == 3 and linea.count(0) == 1:
+                bloqueos += 1
+            if linea.count(oponente) == 2 and linea.count(0) == 2:
+                amenazas += 1
+
+    # Evaluar bloqueos y amenazas en diagonales ascendentes
+    for i in range(4):  # Columnas donde se puede formar una diagonal ascendente
+        for j in range(3):  # Filas donde se puede formar una diagonal ascendente
+            linea = [s[i + 7 * j], s[i + 7 * (j + 1) + 1], s[i + 7 * (j + 2) + 2], s[i + 7 * (j + 3) + 3]]
+            if linea.count(oponente) == 3 and linea.count(0) == 1:
+                bloqueos += 1
+            if linea.count(oponente) == 2 and linea.count(0) == 2:
+                amenazas += 1
+
+    # Evaluar bloqueos y amenazas en diagonales descendentes
+    for i in range(4):  # Columnas donde se puede formar una diagonal descendente
+        for j in range(3, 6):  # Filas donde se puede formar una diagonal descendente
+            linea = [s[i + 7 * j], s[i + 7 * (j - 1) + 1], s[i + 7 * (j - 2) + 2], s[i + 7 * (j - 3) + 3]]
+            if linea.count(oponente) == 3 and linea.count(0) == 1:
+                bloqueos += 1
+            if linea.count(oponente) == 2 and linea.count(0) == 2:
+                amenazas += 1
+
+    # Calcular el valor heurístico
+    # Favorecer bloqueos y penalizar amenazas
+    valor = bloqueos - 2 * amenazas
+     # Normalizar el valor heurístico
+    total_lineas = (7 * 3) + (6 * 4) + (4 * 3) + (4 * 3)  # Total de posibles líneas de 4 en el tablero
+    promedio = valor / total_lineas
+
+    # Verificar si el promedio está fuera de rango
+    if abs(promedio) >= 1:
+        print("ERROR, evaluación fuera de rango --> ", promedio)
+
+    return promedio
 
     
 if __name__ == '__main__':
